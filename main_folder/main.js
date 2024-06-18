@@ -23,8 +23,9 @@ function Gameboard() {
     board[rowIndex][columnIndex].addMove(playerToken);
   };
 
-  const checkWinner = () => {
+  const checkWinner = (playersToken) => {
     let threeInARow = [];
+    let result;
     let allRows = board.map((row) =>
       row.map((eachCell) => eachCell.getValue()),
     );
@@ -52,7 +53,16 @@ function Gameboard() {
       arrays.forEach((el) => threeInARow.push(el));
     })(diagonalRowOne, diagonalRowTwo);
 
-    return threeInARow;
+    (function (array) {
+      let getWinner = array.filter((row) =>
+        row.every((cell) => cell === playersToken),
+      );
+      console.log(getWinner, array);
+      result = getWinner.length ? 'won' : 'not won';
+      console.log(result);
+    })(threeInARow);
+
+    return result;
   };
 
   return {
@@ -75,6 +85,30 @@ function Cell() {
   return {
     addMove,
     getValue,
+  };
+}
+
+function checkers() {
+  let movesMade = 0;
+  let gameStatus = 'not won';
+
+  const incrementMoveCount = () => {
+    movesMade += 1;
+  };
+
+  const getMoveCount = () => movesMade;
+
+  const getGameStatus = () => gameStatus;
+
+  const setGameStatusToWon = () => {
+    gameStatus = 'won';
+  };
+
+  return {
+    incrementMoveCount,
+    getMoveCount,
+    getGameStatus,
+    setGameStatusToWon,
   };
 }
 
@@ -102,40 +136,38 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
 
   const printNewRound = () => {
     board.builtBoard();
-    console.log(`${getActivePlayer().name}'s turn`);
+    console.log(
+      `${getActivePlayer().name}'s turn with ${getActivePlayer().token}`,
+    );
   };
 
-  let totalTurnsPlayed = 0;
+  const moveCounter = checkers();
 
-  const playRound = (x, y) => {
-    if (totalTurnsPlayed === 'won') {
-      return;
+  const playRound = (row, column) => {
+    if (moveCounter.getGameStatus() === 'won') {
+      return 'game over';
     }
+    moveCounter.incrementMoveCount();
+    const gameCount = moveCounter.getMoveCount();
+    console.log(gameCount);
 
-    board.makeMove(x, y, getActivePlayer().token);
-
-    totalTurnsPlayed += 1;
-    if (totalTurnsPlayed > 4) {
-      (function () {
-        let allRowsInGame = board.checkWinner();
-        console.log(allRowsInGame, getActivePlayer().token);
-
-        let getWinner = allRowsInGame.filter((row) =>
-          row.every((cell) => cell === getActivePlayer().token),
-        );
-
-        if (getWinner.length) {
-          totalTurnsPlayed = 'won';
-          console.log(`${getActivePlayer().name} is a winner, game over`);
+    if (gameCount <= 8 && moveCounter.getGameStatus() !== 'won') {
+      board.makeMove(row, column, getActivePlayer().token);
+      if (gameCount >= 5) {
+        let gameResult = board.checkWinner(getActivePlayer().token);
+        if (gameResult === 'won') {
+          moveCounter.setGameStatusToWon();
+        } else {
+          switchPlayerTurn();
+          printNewRound();
         }
-      })();
+      } else {
+        switchPlayerTurn();
+        printNewRound();
+      }
+    } else {
+      return 'game over';
     }
-
-    if (totalTurnsPlayed === 'won') {
-      return;
-    }
-    switchPlayerTurn();
-    printNewRound();
   };
 
   printNewRound();
@@ -145,3 +177,5 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
     getActivePlayer,
   };
 }
+
+let play = gamePlay();
