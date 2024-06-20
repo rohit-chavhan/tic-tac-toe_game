@@ -185,6 +185,7 @@ function ScreenController() {
 
   const playerTurnDiv = document.querySelector('.turn');
   const boardDiv = document.querySelector('.board');
+  const restartBtn = document.querySelector('.restart');
 
   const updateScreen = () => {
     boardDiv.textContent = '';
@@ -207,18 +208,29 @@ function ScreenController() {
   };
 
   function clickHandlerBoard(e) {
-    const rowCell = Number(e.target.dataset.row);
-    const columnCell = Number(e.target.dataset.column);
-    let gameOutcomes = game.playRound(rowCell, columnCell);
-    updateScreen();
-    if (gameOutcomes === 'won') {
-      playerTurnDiv.textContent = `${game.getActivePlayer().name} won the game, good job :)`;
-      boardDiv.removeEventListener('click', clickHandlerBoard);
+    console.log(e.target.outerText);
+
+    if (e.target.outerText !== '') {
+      return;
+    } else {
+      const rowCell = Number(e.target.dataset.row);
+      const columnCell = Number(e.target.dataset.column);
+      let gameOutcomes = game.playRound(rowCell, columnCell);
+      updateScreen();
+
+      if (gameOutcomes === 'won') {
+        playerTurnDiv.textContent = `${game.getActivePlayer().name} won the game, good job :)`;
+        boardDiv.removeEventListener('click', clickHandlerBoard);
+      }
     }
   }
 
-  boardDiv.addEventListener('click', clickHandlerBoard);
+  function clearData() {
+    location.reload();
+  }
 
+  boardDiv.addEventListener('click', clickHandlerBoard);
+  restartBtn.addEventListener('click', clearData);
   updateScreen();
 }
 ScreenController();
