@@ -20,6 +20,7 @@ function Gameboard() {
   };
 
   const makeMove = (rowIndex, columnIndex, playerToken) => {
+    console.log('from makeMove func', rowIndex, columnIndex, playerToken);
     board[rowIndex][columnIndex].addMove(playerToken);
   };
 
@@ -59,7 +60,6 @@ function Gameboard() {
       );
       console.log(getWinner, array);
       result = getWinner.length ? 'won' : 'not won';
-      console.log(result);
     })(threeInARow);
 
     return result;
@@ -74,9 +74,10 @@ function Gameboard() {
 }
 
 function Cell() {
-  let value = '_';
+  let value = ' ';
 
   const addMove = (player) => {
+    console.log(player);
     value = player;
   };
 
@@ -149,14 +150,14 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
     }
     moveCounter.incrementMoveCount();
     const gameCount = moveCounter.getMoveCount();
-    console.log(gameCount);
 
-    if (gameCount <= 8 && moveCounter.getGameStatus() !== 'won') {
+    if (gameCount <= 9 && moveCounter.getGameStatus() !== 'won') {
       board.makeMove(row, column, getActivePlayer().token);
       if (gameCount >= 5) {
         let gameResult = board.checkWinner(getActivePlayer().token);
         if (gameResult === 'won') {
           moveCounter.setGameStatusToWon();
+          return 'won';
         } else {
           switchPlayerTurn();
           printNewRound();
@@ -175,7 +176,49 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
   return {
     playRound,
     getActivePlayer,
+    getBoard: board.getBoard,
   };
 }
 
-let play = gamePlay();
+function ScreenController() {
+  const game = gamePlay();
+
+  const playerTurnDiv = document.querySelector('.turn');
+  const boardDiv = document.querySelector('.board');
+
+  const updateScreen = () => {
+    boardDiv.textContent = '';
+
+    const board = game.getBoard();
+    const activePlayer = game.getActivePlayer();
+
+    playerTurnDiv.textContent = `${activePlayer.name}'s turn with ${activePlayer.token}`;
+
+    board.forEach((row, rowIndex) => {
+      row.forEach((cell, cellIndex) => {
+        const cellButton = document.createElement('button');
+        cellButton.classList.add('cell');
+        cellButton.dataset.row = `${rowIndex}`;
+        cellButton.dataset.column = `${cellIndex}`;
+        cellButton.textContent = cell.getValue();
+        boardDiv.appendChild(cellButton);
+      });
+    });
+  };
+
+  function clickHandlerBoard(e) {
+    const rowCell = Number(e.target.dataset.row);
+    const columnCell = Number(e.target.dataset.column);
+    let gameOutcomes = game.playRound(rowCell, columnCell);
+    updateScreen();
+    if (gameOutcomes === 'won') {
+      playerTurnDiv.textContent = `${game.getActivePlayer().name} won the game, good job :)`;
+      boardDiv.removeEventListener('click', clickHandlerBoard);
+    }
+  }
+
+  boardDiv.addEventListener('click', clickHandlerBoard);
+
+  updateScreen();
+}
+ScreenController();
