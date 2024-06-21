@@ -13,14 +13,10 @@ function Gameboard() {
   const getBoard = () => board;
 
   const builtBoard = () => {
-    const boardCelss = board.map((row) =>
-      row.map((eachCell) => eachCell.getValue()),
-    );
-    console.log(boardCelss);
+    board.map((row) => row.map((eachCell) => eachCell.getValue()));
   };
 
   const makeMove = (rowIndex, columnIndex, playerToken) => {
-    console.log('from makeMove func', rowIndex, columnIndex, playerToken);
     board[rowIndex][columnIndex].addMove(playerToken);
   };
 
@@ -58,7 +54,7 @@ function Gameboard() {
       let getWinner = array.filter((row) =>
         row.every((cell) => cell === playersToken),
       );
-      console.log(getWinner, array);
+      // console.log(getWinner, array);
       result = getWinner.length ? 'won' : 'not won';
     })(threeInARow);
 
@@ -77,7 +73,7 @@ function Cell() {
   let value = ' ';
 
   const addMove = (player) => {
-    console.log(player);
+    // console.log(player);
     value = player;
   };
 
@@ -137,16 +133,13 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
 
   const printNewRound = () => {
     board.builtBoard();
-    console.log(
-      `${getActivePlayer().name}'s turn with ${getActivePlayer().token}`,
-    );
   };
 
   const moveCounter = checkers();
 
   const playRound = (row, column) => {
     if (moveCounter.getGameStatus() === 'won') {
-      return 'game over';
+      return;
     }
     moveCounter.incrementMoveCount();
     const gameCount = moveCounter.getMoveCount();
@@ -158,6 +151,8 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
         if (gameResult === 'won') {
           moveCounter.setGameStatusToWon();
           return 'won';
+        } else if (gameCount === 9 && moveCounter.getGameStatus() !== 'won') {
+          return 'tie';
         } else {
           switchPlayerTurn();
           printNewRound();
@@ -167,7 +162,7 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
         printNewRound();
       }
     } else {
-      return 'game over';
+      return;
     }
   };
 
@@ -208,8 +203,6 @@ function ScreenController() {
   };
 
   function clickHandlerBoard(e) {
-    console.log(e.target.outerText);
-
     if (e.target.outerText !== '') {
       return;
     } else {
@@ -221,16 +214,15 @@ function ScreenController() {
       if (gameOutcomes === 'won') {
         playerTurnDiv.textContent = `${game.getActivePlayer().name} won the game, good job :)`;
         boardDiv.removeEventListener('click', clickHandlerBoard);
+      } else if (gameOutcomes === 'tie') {
+        playerTurnDiv.textContent = `Game got tie * * :)`;
+        boardDiv.removeEventListener('click', clickHandlerBoard);
       }
     }
   }
 
-  function clearData() {
-    location.reload();
-  }
-
   boardDiv.addEventListener('click', clickHandlerBoard);
-  restartBtn.addEventListener('click', clearData);
+  restartBtn.addEventListener('click', () => location.reload());
   updateScreen();
 }
 ScreenController();
