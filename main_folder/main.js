@@ -21,44 +21,36 @@ function Gameboard() {
   };
 
   const checkWinner = (playersToken) => {
-    let threeInARow = [];
-    let result;
     let allRows = board.map((row) =>
       row.map((eachCell) => eachCell.getValue()),
     );
 
-    let allCoulumns = allRows[0].map((_, colIndex) =>
+    let allCoulumns = allRows.map((_, colIndex) =>
       allRows.map((row) => row[colIndex]),
     );
 
-    let diagonalRowOne = allRows[0].map(
+    let diagonalRowOne = allRows.map(
       (_, colIndex) => allRows[colIndex][colIndex],
     );
 
-    let rowReverse = allRows.reverse();
-    let diagonalRowTwo = allRows[0].map(
-      (_, colIndex) => rowReverse[colIndex][colIndex],
+    let diagonalRowTwo = allRows.map(
+      (_, colIndex) => allRows[colIndex][allRows.length - 1 - colIndex],
     );
 
-    // pushing row and column arrays
-    (function (...arrays) {
-      arrays.forEach((el) => el.forEach((eachEl) => threeInARow.push(eachEl)));
-    })(allCoulumns, allRows);
+    let threeInARow = [
+      ...allRows,
+      ...allCoulumns,
+      diagonalRowOne,
+      diagonalRowTwo,
+    ];
 
-    // pushing diagonal arrays
-    (function (...arrays) {
-      arrays.forEach((el) => threeInARow.push(el));
-    })(diagonalRowOne, diagonalRowTwo);
+    for (let eachRow of threeInARow) {
+      if (eachRow.every((cell) => cell === playersToken)) {
+        return 'won';
+      }
+    }
 
-    (function (array) {
-      let getWinner = array.filter((row) =>
-        row.every((cell) => cell === playersToken),
-      );
-      // console.log(getWinner, array);
-      result = getWinner.length ? 'won' : 'not won';
-    })(threeInARow);
-
-    return result;
+    return 'not won';
   };
 
   return {
@@ -73,7 +65,6 @@ function Cell() {
   let value = ' ';
 
   const addMove = (player) => {
-    // console.log(player);
     value = player;
   };
 
@@ -138,31 +129,28 @@ function gamePlay(playeOneName = 'rohit', playeTwoName = 'karan') {
   const moveCounter = checkers();
 
   const playRound = (row, column) => {
-    if (moveCounter.getGameStatus() === 'won') {
+    const gameStatus = moveCounter.getGameStatus();
+
+    if (gameStatus === 'won') {
       return;
     }
     moveCounter.incrementMoveCount();
     const gameCount = moveCounter.getMoveCount();
 
-    if (gameCount <= 9 && moveCounter.getGameStatus() !== 'won') {
+    if (gameCount <= 9 && gameStatus !== 'won') {
       board.makeMove(row, column, getActivePlayer().token);
       if (gameCount >= 5) {
         let gameResult = board.checkWinner(getActivePlayer().token);
         if (gameResult === 'won') {
           moveCounter.setGameStatusToWon();
           return 'won';
-        } else if (gameCount === 9 && moveCounter.getGameStatus() !== 'won') {
+        } else if (gameCount === 9 && gameStatus !== 'won') {
           return 'tie';
-        } else {
-          switchPlayerTurn();
-          printNewRound();
         }
-      } else {
-        switchPlayerTurn();
-        printNewRound();
       }
-    } else {
-      return;
+
+      switchPlayerTurn();
+      printNewRound();
     }
   };
 
@@ -212,13 +200,18 @@ function ScreenController() {
       updateScreen();
 
       if (gameOutcomes === 'won') {
-        playerTurnDiv.textContent = `${game.getActivePlayer().name} won the game, good job :)`;
-        boardDiv.removeEventListener('click', clickHandlerBoard);
+        handleGameOutcome(
+          `${game.getActivePlayer().name} won the game, good job :)`,
+        );
       } else if (gameOutcomes === 'tie') {
-        playerTurnDiv.textContent = `Game got tie * * :)`;
-        boardDiv.removeEventListener('click', clickHandlerBoard);
+        handleGameOutcome(`Game got tie * * :)`);
       }
     }
+  }
+
+  function handleGameOutcome(message) {
+    playerTurnDiv.textContent = message;
+    boardDiv.removeEventListener('click', clickHandlerBoard);
   }
 
   boardDiv.addEventListener('click', clickHandlerBoard);

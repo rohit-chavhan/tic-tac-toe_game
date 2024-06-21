@@ -1,0 +1,50 @@
+body {
+  font-family: 'Righteous', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  background-color: #f0f0f0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.board {
+  height: 420px;
+  width: 420px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.cell {
+  font-family: 'Indie Flower', cursive;
+  font-weight: 400;
+  font-size: 45px;
+  font-style: normal;
+  color: #f0f0f0;
+  border-style: none;
+  background-color: #364f6b;
+  border-radius: 10px;
+}
+
+.titleBtn {
+  display: flex;
+  gap: 20px;
+}
+
+.restart {
+  background-color: #fc5185;
+  font-family: 'Righteous', sans-serif;
+  border-style: none;
+  font-weight: 400;
+  font-style: normal;
+  border-radius: 20px;
+  color: white;
+  align-self: center;
+  padding: 10px;
+  font-size: 15px;
+}
